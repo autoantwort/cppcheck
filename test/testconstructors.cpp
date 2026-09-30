@@ -797,6 +797,23 @@ private:
         ASSERT_EQUALS("[test.cpp:4:9]: (warning) Member variable 'T::j' has no initializer. [uninitMemberVarNoCtor]\n"
                       "[test.cpp:8:9]: (warning) Member variable 'U::k' has no initializer. [uninitMemberVarNoCtor]\n",
                       errout_str());
+
+        check("struct S {\n" // const and reference members can't stay uninitialized
+              "    int a = 0;\n"
+              "    const int b;\n"
+              "    int& c;\n"
+              "    const int* d;\n"
+              "};\n");
+        ASSERT_EQUALS("[test.cpp:5:16]: (warning) Member variable 'S::d' has no initializer. [uninitMemberVarNoCtor]\n", errout_str());
+
+        check("struct S {\n"
+              "    const std::array<std::uint8_t, 2> a;\n"
+              "    const std::vector<std::uint8_t>::const_iterator it;\n"
+              "};\n"
+              "S f(const std::vector<std::uint8_t>& v) {\n"
+              "    return S{ {}, v.cbegin() };\n"
+              "}\n");
+        ASSERT_EQUALS("", errout_str());
     }
 
     // ticket #4290 "False Positive: style (noConstructor): The class 'foo' does not have a constructor."

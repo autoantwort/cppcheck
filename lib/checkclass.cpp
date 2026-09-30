@@ -373,6 +373,10 @@ void CheckClassImpl::constructors()
                 if (var.typeScope() && var.typeScope()->numConstructors > 0)
                     continue;
 
+                // const and reference members without default initializer must be initialized by every instance
+                if (var.isConst() || var.isReference())
+                    continue;
+
                 if (diagVars.count(&var) == 0)
                     uninitVarError(var.nameToken(), false, FunctionType::eConstructor, var.scope()->className, var.name(), false, false, true);
             }
