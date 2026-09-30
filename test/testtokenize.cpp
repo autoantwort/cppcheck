@@ -8135,6 +8135,22 @@ private:
                                              "    *p = -*p;\n"
                                              "}\n"));
 
+        ASSERT_NO_THROW(tokenizeAndStringify("void f(void* h) {\n" // cast before global scope operator
+                                             "    (void)::CloseHandle(h);\n"
+                                             "    int i = (int)::GetTickCount();\n"
+                                             "    g((unsigned char)::toupper(i));\n"
+                                             "}\n"));
+        ASSERT_NO_THROW(tokenizeAndStringify("int f(int i) {\n"
+                                             "    return (int)::abs(i);\n"
+                                             "}\n"));
+        ASSERT_NO_THROW(tokenizeAndStringify("namespace N { struct T {}; }\n"
+                                             "void f(void* p) {\n"
+                                             "    new (p) ::N::T;\n"
+                                             "}\n"));
+        ASSERT_NO_THROW(tokenizeAndStringify("struct S { using type = int; };\n"
+                                             "S s;\n"
+                                             "decltype(s)::type i;\n"));
+
         ignore_errout();
 
         ASSERT_EQUALS(";", tokenizeAndStringify("typedef std::size_t size_t;\n")); // #14809
