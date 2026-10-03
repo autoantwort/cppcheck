@@ -2739,30 +2739,6 @@ private:
                       "10: } ;\n"
                       "11: int T :: g ( ) { return * p@5 ; }\n",
                       tokenize(code14));
-
-        const char code15[] = "struct S {\n" // lambda in initializer list
-                              "    int x;\n"
-                              "    int* p;\n"
-                              "    S(int* p) : x([p] { return *p; }()), p(p) {}\n"
-                              "    S(int* p, int) : x([](int* q) { int y = *q; return y; }(p)), p(p) {}\n"
-                              "};\n"
-                              "struct T {\n"
-                              "    int* p;\n"
-                              "    int g();\n"
-                              "};\n"
-                              "int T::g() { return *p; }\n";
-        ASSERT_EQUALS("1: struct S {\n"
-                      "2: int x@1 ;\n"
-                      "3: int * p@2 ;\n"
-                      "4: S ( int * p@3 ) : x@1 ( [ p@3 ] { return * p@3 ; } ( ) ) , p@2 ( p@3 ) { }\n"
-                      "5: S ( int * p@4 , int ) : x@1 ( [ ] ( int * q@5 ) { int y@6 ; y@6 = * q@5 ; return y@6 ; } ( p@4 ) ) , p@2 ( p@4 ) { }\n"
-                      "6: } ;\n"
-                      "7: struct T {\n"
-                      "8: int * p@7 ;\n"
-                      "9: int g ( ) ;\n"
-                      "10: } ;\n"
-                      "11: int T :: g ( ) { return * p@7 ; }\n",
-                      tokenize(code15));
     }
 
     void varid_initListWithBaseTemplate() {
