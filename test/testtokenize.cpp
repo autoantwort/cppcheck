@@ -8135,7 +8135,7 @@ private:
                                              "    *p = -*p;\n"
                                              "}\n"));
 
-        ASSERT_NO_THROW(tokenizeAndStringify("void f(void* h) {\n" // cast before global scope operator
+        ASSERT_NO_THROW(tokenizeAndStringify("void f(void* h) {\n" // #15079
                                              "    (void)::CloseHandle(h);\n"
                                              "    int i = (int)::GetTickCount();\n"
                                              "    g((unsigned char)::toupper(i));\n"
@@ -8150,6 +8150,12 @@ private:
         ASSERT_NO_THROW(tokenizeAndStringify("struct S { using type = int; };\n"
                                              "S s;\n"
                                              "decltype(s)::type i;\n"));
+        {
+            const Settings s = settingsBuilder().cpp(Standards::CPP03).build();
+            ASSERT_NO_THROW(tokenizeAndStringify("struct S { typedef int type; };\n"
+                                                 "S s;\n"
+                                                 "decltype(s)::type i;\n", s));
+        }
 
         ignore_errout();
 

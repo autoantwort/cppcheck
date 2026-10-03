@@ -9180,7 +9180,7 @@ void Tokenizer::findGarbageCode() const
                 // NAME(...)::  => NAME is most likely an unknown macro
                 // other cases are valid, e.g. (void)::f(), return (T)::x, new (p) ::T, decltype(x)::type
                 const Token* const prev = tok->linkAt(-1)->tokAt(-1);
-                if (Token::Match(prev, "%name% (") && !prev->isKeyword()) {
+                if (Token::Match(prev, "%name% (") && !prev->isKeyword() && prev->str() != "decltype") { // decltype is no keyword before C++11
                     if (prev->isUpperCaseName())
                         unknownMacroError(prev);
                     else
