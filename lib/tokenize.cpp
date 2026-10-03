@@ -4771,6 +4771,7 @@ void Tokenizer::setVarIdPass1()
     std::stack<const Token *> functionDeclEndStack;
     const Token *functionDeclEndToken = nullptr;
     bool initlist = false;
+    std::stack<const Token *> initlistLambdaEnds; // ends of lambda bodies in an initializer list
     bool inlineFunction = false;
     for (Token *tok = list.front(); tok; tok = tok->next()) {
         if (tok->isOp())
@@ -4843,6 +4844,7 @@ void Tokenizer::setVarIdPass1()
                     while (Token::Match(prev, "%name%|."))
                         prev = prev->previous();
                     const bool isLambda = prev && prev->str() == ")" && Token::simpleMatch(prev->link()->previous(), "] (");
+                    const bool isInitlistLambda = initlist && (isLambda || Token::simpleMatch(prev, "]"));
                     if ((!isLambda && (tok->strAt(-1) == ")" || Token::Match(tok->tokAt(-2), ") %type%"))) ||
                         (initlist && tok->strAt(-1) == "}")) {
                         isExecutable = true;
@@ -4852,8 +4854,10 @@ void Tokenizer::setVarIdPass1()
                         if (!(scopeStack.top().isStructInit || tok->strAt(-1) == "="))
                             variableMap.enterScope();
                     }
-                    const bool isStructInit = scopeStack.top().isStructInit || tok->strAt(-1) == "=" || (initlist && !Token::Match(tok->tokAt(-1), ")|}|..."));
+                    const bool isStructInit = scopeStack.top().isStructInit || tok->strAt(-1) == "=" || (initlist && !isInitlistLambda && !Token::Match(tok->tokAt(-1), ")|}|..."));
                     scopeStack.emplace(isExecutable, isStructInit, isEnumStart(tok), variableMap.getVarId());
+                    if (isInitlistLambda)
+                        initlistLambdaEnds.push(tok->link());
                     initlist = false;
                 } else { /* if (tok->str() == "}") */
                     bool isNamespace = false;
@@ -4893,6 +4897,11 @@ void Tokenizer::setVarIdPass1()
                     scopeStack.pop();
                     if (scopeStack.empty()) {  // should be impossible
                         scopeStack.emplace(/*VarIdScopeInfo()*/);
+                    }
+                    if (!initlistLambdaEnds.empty() && initlistLambdaEnds.top() == tok) {
+                        // continue with the initializer list after the lambda
+                        initlistLambdaEnds.pop();
+                        initlist = true;
                     }
                 }
             }
