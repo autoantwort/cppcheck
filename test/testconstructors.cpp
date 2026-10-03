@@ -798,13 +798,32 @@ private:
                       "[test.cpp:8:9]: (warning) Member variable 'U::k' has no initializer. [uninitMemberVarNoCtor]\n",
                       errout_str());
 
-        check("struct S {\n" // const and reference members can't stay uninitialized
+        check("struct S {\n" // #15080
               "    int a = 0;\n"
               "    const int b;\n"
+              "    int k;\n"
+              "};\n");
+        ASSERT_EQUALS("", errout_str());
+
+        check("struct S {\n"
+              "    int a = 0;\n"
               "    int& c;\n"
+              "    int k;\n"
+              "};\n");
+        ASSERT_EQUALS("", errout_str());
+
+        check("struct S {\n"
+              "    int a = 0;\n"
               "    const int* d;\n"
               "};\n");
-        ASSERT_EQUALS("[test.cpp:5:16]: (warning) Member variable 'S::d' has no initializer. [uninitMemberVarNoCtor]\n", errout_str());
+        ASSERT_EQUALS("[test.cpp:3:16]: (warning) Member variable 'S::d' has no initializer. [uninitMemberVarNoCtor]\n", errout_str());
+
+        check("struct S {\n"
+              "    std::string a;\n"
+              "    const std::string s;\n"
+              "    int k;\n"
+              "};\n");
+        ASSERT_EQUALS("[test.cpp:4:9]: (warning) Member variable 'S::k' has no initializer. [uninitMemberVarNoCtor]\n", errout_str());
 
         check("struct S {\n"
               "    const std::array<std::uint8_t, 2> a;\n"
