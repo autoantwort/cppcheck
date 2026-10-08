@@ -819,6 +819,21 @@ private:
         ASSERT_EQUALS("[test.cpp:3:16]: (warning) Member variable 'S::d' has no initializer. [uninitMemberVarNoCtor]\n", errout_str());
 
         check("struct S {\n"
+              "    int a = 0;\n"
+              "    int* const p;\n"
+              "    int k;\n"
+              "};\n");
+        ASSERT_EQUALS("", errout_str());
+
+        check("struct S {\n" // static members don't affect the default constructor
+              "    int a = 0;\n"
+              "    static const int N;\n"
+              "    static int& r;\n"
+              "    int k;\n"
+              "};\n");
+        ASSERT_EQUALS("[test.cpp:5:9]: (warning) Member variable 'S::k' has no initializer. [uninitMemberVarNoCtor]\n", errout_str());
+
+        check("struct S {\n"
               "    std::string a;\n"
               "    const std::string s;\n"
               "    int k;\n"
