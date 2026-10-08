@@ -356,7 +356,7 @@ void CheckClassImpl::constructors()
                 if (var.hasDefault()) {
                     usage.init = true;
                     hasAnyDefaultInit = true;
-                } else if (var.isReference() || (var.isConst() && !var.isClass())) {
+                } else if (!var.isStatic() && (var.isReference() || (var.isConst() && !var.isClass()))) {
                     // the default constructor is deleted, so all members are initialized by every instance
                     isDefaultConstructible = false;
                 } else if (cpp14OrLater && !hasAnySelfInit && isInitialized(usage, FunctionType::eConstructor)) {
