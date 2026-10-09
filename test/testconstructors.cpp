@@ -833,6 +833,39 @@ private:
               "};\n");
         ASSERT_EQUALS("[test.cpp:5:9]: (warning) Member variable 'S::k' has no initializer. [uninitMemberVarNoCtor]\n", errout_str());
 
+        check("struct S {\n" // function pointers returning a reference are no references
+              "    int a = 0;\n"
+              "    std::string& (*f)(int, int);\n"
+              "    int& (*g[2])();\n"
+              "    int k;\n"
+              "};\n");
+        ASSERT_EQUALS("[test.cpp:3:20]: (warning) Member variable 'S::f' has no initializer. [uninitMemberVarNoCtor]\n"
+                      "[test.cpp:4:12]: (warning) Member variable 'S::g' has no initializer. [uninitMemberVarNoCtor]\n"
+                      "[test.cpp:5:9]: (warning) Member variable 'S::k' has no initializer. [uninitMemberVarNoCtor]\n",
+                      errout_str());
+
+        check("struct S {\n"
+              "    int a = 0;\n"
+              "    int (*&f)();\n"
+              "    int k;\n"
+              "};\n");
+        ASSERT_EQUALS("", errout_str());
+
+        check("struct S {\n"
+              "    int a = 0;\n"
+              "    int (&arr)[2];\n"
+              "    int k;\n"
+              "};\n");
+        ASSERT_EQUALS("", errout_str());
+
+        check("typedef const unsigned int Mode;\n"
+              "struct S {\n"
+              "    std::vector<int> v;\n"
+              "    Mode m;\n"
+              "    int k;\n"
+              "};\n");
+        ASSERT_EQUALS("", errout_str());
+
         check("struct S {\n"
               "    std::string a;\n"
               "    const std::string s;\n"
